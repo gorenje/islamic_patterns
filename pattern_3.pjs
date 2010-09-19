@@ -1,0 +1,173 @@
+// -*- js2 -*-
+// 	Processing.js Example
+
+var MasterCircle = function( cpt, radius, num_of_points ) {
+  this.num_of_points = num_of_points;
+  this.circle = new ProCircle( cpt, radius );
+  this.factor_larger = 1;
+  this.draw_the_circles = 1;
+};
+
+MasterCircle.prototype = {
+  sub_circles: function() {
+    var pts = this.circle.points(this.num_of_points);
+    var sub_circles = new Array();
+    var n_circle = null;
+    var p_circle = null;
+    
+    for ( idx in pts ) {
+      var center_pt = this.circle.cpt.point_on_segment(pts[idx], this.factor_larger);
+      var circle = new ProCircle(center_pt, this.circle.radius);
+      circle.prev_circle = p_circle;
+      sub_circles[idx] = circle;
+      p_circle = circle;
+    }
+
+    sub_circles[0].prev_circle = sub_circles[this.num_of_points - 1];
+    n_circle = sub_circles[0];
+    for ( var idx = this.num_of_points - 1; idx > -1; idx-- ) {
+      sub_circles[idx].next_circle = n_circle;
+      n_circle = sub_circles[idx];
+    }
+    return sub_circles;
+  },
+  
+  draw_more_intersections: function(context) {
+    var subs = this.sub_circles();
+    var next_points = [];
+    var more_points = [];
+
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      fill(230,200,30);
+      var rect = new ProRect(cc.cpt, null, cc.next_circle.cpt, null);
+      rect.draw(context);
+      next_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    fill(200,200,50);
+    next_points.push(next_points[0]);
+    for ( var idx = 0; idx < next_points.length-1; idx++) {
+      var rect = new ProRect(next_points[idx], null, next_points[idx+1], null);
+      rect.draw(context);
+      more_points.push(this.circle.cpt.closest(rect.points));
+    }
+    
+    next_points = [];
+    fill(170,200,70);
+    more_points.push(more_points[0]);
+    for ( var idx = 0; idx < more_points.length-1; idx++) {
+      var rect = new ProRect(more_points[idx], null, more_points[idx+1], null);
+      rect.draw(context);
+      next_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    more_points = [];
+    fill(140,200,90);
+    next_points.push(next_points[0]);
+    for ( var idx = 0; idx < next_points.length-1; idx++) {
+      var rect = new ProRect(next_points[idx], null, next_points[idx+1], null);
+      rect.draw(context);
+      more_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    next_points = [];
+    fill(110,200,110);
+    more_points.push(more_points[0]);
+    for ( var idx = 0; idx < more_points.length-1; idx++) {
+      var rect = new ProRect(more_points[idx], null, more_points[idx+1], null);
+      rect.draw(context);
+      next_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    more_points = [];
+    fill(80,200,130);
+    next_points.push(next_points[0]);
+    for ( var idx = 0; idx < next_points.length-1; idx++) {
+      var rect = new ProRect(next_points[idx], null, next_points[idx+1], null);
+      rect.draw(context);
+      more_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    next_points = [];
+    fill(50,200,150);
+    more_points.push(more_points[0]);
+    for ( var idx = 0; idx < more_points.length-1; idx++) {
+      var rect = new ProRect(more_points[idx], null, more_points[idx+1], null);
+      rect.draw(context);
+      next_points.push(this.circle.cpt.closest(rect.points));
+    }
+
+    more_points = [];
+    fill(20,200,170);
+    next_points.push(next_points[0]);
+    for ( var idx = 0; idx < next_points.length-1; idx++) {
+      var rect = new ProRect(next_points[idx], null, next_points[idx+1], null);
+      rect.draw(context);
+      more_points.push(this.circle.cpt.closest(rect.points));
+    }
+  },
+
+  draw_intersections: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+
+      var pt1 = cc.cpt;
+      var pt2 = pt1.closest(cc.prev_circle.prev_circle.intersection(cc.next_circle));
+      var pt3 = pt2.closest(cc.prev_circle.intersection(cc.next_circle));
+      var pt4 = pt3.closest(cc.next_circle.next_circle.intersection(cc.prev_circle));
+
+      fill(255,200,10);
+      (new ProRect(pt1, pt2, pt3, pt4)).draw(context);
+    }
+  },
+
+  draw_circles: function(context) {
+    context.noFill();
+    context.stroke(0,255,100);
+    var subs = this.sub_circles();
+    for ( c in subs ) { subs[c].draw(context); }
+    this.circle.draw(context);
+  },
+
+  new_masters: function() {
+    var subs = this.sub_circles();
+    var ret_val = [];
+    for ( c in subs ) { 
+      ret_val.push(new MasterCircle( subs[c].cpt.clone(), subs[c].radius, 
+                                     this.num_of_points));
+    }
+    return ret_val;
+  },
+};
+
+var master_circle = new MasterCircle(new ProPoint(300,300), 140, 12);
+var generation = 0;
+var masters = master_circle.new_masters();
+
+void setup() {
+  size(600, 600);
+  frameRate(1);
+  background(#001100);
+}
+
+void draw() {
+  if ( generation == 0 ) {
+    master_circle.draw_circles(this);
+  } else if ( generation == 1 ) {
+    master_circle.draw_intersections(this);
+  } else if ( generation == 2 ) {
+    master_circle.draw_more_intersections(this);
+   } else if ( generation == 0 ) {
+// //    for (idx in masters) { masters[idx].draw_circles(this); }
+//   } else if ( generation == 1 ) {
+//     for (idx in masters) { masters[idx].draw_intersections(this); }
+//   } else if ( generation == 2 ) {
+//     for (idx in masters) { masters[idx].draw_more_intersections(this); }
+  } else {
+    exit(); 
+  }
+  generation += 1;
+}
+

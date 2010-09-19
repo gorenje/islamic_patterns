@@ -141,7 +141,19 @@ ProCircle.prototype = {
 
 
 var ProRect = function(pt1, pt2, pt3, pt4 ) {
+  this._compute = function(pt1,pt2) {
+    var d = pt1.distance(pt2);
+    var radius = Math.sqrt((d*d)/2);
+    return (new ProCircle(pt1,radius)).intersection(new ProCircle(pt2,radius));
+  };
+
   this.points = [pt1, pt2, pt3, pt4];
+
+  if ( pt2 == null && pt4 == null ) {
+    var pts = this._compute(pt1, pt3);
+    this.points = [pt1, pts[0], pt3, pts[1]];
+  }
+
   this._sort_funct = function(a,b) {
     return ProOrigin.distance(a) < ProOrigin.distance(b);
   };

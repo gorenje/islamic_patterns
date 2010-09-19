@@ -4,8 +4,8 @@
 var MasterCircle = function( cpt, radius, num_of_points ) {
   this.num_of_points = num_of_points;
   this.circle = new ProCircle( cpt, radius );
-  this.factor_larger = 1.5;
-  this.draw_the_circles = 2;
+  this.factor_larger = 1.5; // change this to make rects + triangles bigger/smaller
+  this.draw_the_circles = 2; // set to one to not draw circles
 };
 
 MasterCircle.prototype = {
