@@ -1,0 +1,168 @@
+// -*- js2 -*-
+// 	Processing.js Example
+
+var MasterCircle = function( cpt, radius, num_of_points ) {
+  this.num_of_points = num_of_points;
+  this.circle = new ProCircle( cpt, radius );
+  this.factor_larger = 1;
+  this.draw_the_circles = 1;
+};
+
+MasterCircle.prototype = {
+  sub_circles: function() {
+    var pts = this.circle.points(this.num_of_points);
+    var sub_circles = new Array();
+    var n_circle = null;
+    var p_circle = null;
+    
+    for ( idx in pts ) {
+      var center_pt = this.circle.cpt.point_on_segment(pts[idx], this.factor_larger);
+      var circle = new ProCircle(center_pt, this.circle.radius);
+      circle.prev_circle = p_circle;
+      sub_circles[idx] = circle;
+      p_circle = circle;
+    }
+
+    sub_circles[0].prev_circle = sub_circles[this.num_of_points - 1];
+    n_circle = sub_circles[0];
+    for ( var idx = this.num_of_points - 1; idx > -1; idx-- ) {
+      sub_circles[idx].next_circle = n_circle;
+      n_circle = sub_circles[idx];
+    }
+    return sub_circles;
+  },
+  
+  draw_even_more_intersections: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noFill();
+      context.stroke( 23,78, 102);
+      
+      var pt1 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+      var pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+      var pt3 = cc.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+      var pt4 = cc.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+
+      (l1 = new ProLine(pt1, pt3)).draw(context);
+      (l2 = new ProLine(pt4, pt2)).draw(context);
+      var topTr = l1.intersection(l2);
+      (new ProCircle(topTr, 5)).draw(context);
+
+      pt1 = this.circle.cpt.point_on_segment(cc.cpt, 3/4);
+      pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+      (l3 = new ProLine(pt1, pt2)).draw(context);
+
+      var botL = l1.intersection(l3);
+      (new ProCircle(botL, 5)).draw(context);
+
+      var botR = l2.intersection(l3);
+      (new ProCircle(botR, 5)).draw(context);
+      
+      context.stroke( 255,255,255 );
+      (new ProTriangle(topTr, botL, botR)).draw(context);
+
+      var lines = [
+        new ProLine( botR, cc.cpt.point_on_segment(botR,2.0)),
+        new ProLine( botL, cc.next_circle.cpt.point_on_segment(botL,2.0)),
+        new ProLine( topTr, this.circle.cpt.point_on_segment(topTr,2.0))
+      ];
+
+      // strange computation but not all intersections are the same. A few are
+      // off so in order to get the "correct" intersection, we take a vote
+      stroke( 255, 0,0);
+      lines[0].draw(context);
+      lines[1].draw(context);
+      lines[2].draw(context);
+
+      stroke( 255, 255,255);
+      var center = lines[2].intersection(lines[1]);
+      (new ProCircle(center, 5)).draw(context);
+
+      var pt2 = topTr.point_on_segment(center, 2);
+//      (new ProCircle(pt2, 5)).draw(context);
+
+      var pt3 = botL.point_on_segment(center, 2);
+//      (new ProCircle(pt3, 5)).draw(context);
+
+      var pt1 = botR.point_on_segment(center, 2);
+//      (new ProCircle(pt1, 5)).draw(context);
+    }
+  },
+
+  draw_more_intersections: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noFill();
+      context.stroke( 23,78, 102);
+      
+      var pt1 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+      var pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+      var pt3 = cc.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+      var pt4 = cc.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+      (new ProLine(pt1, pt3)).draw(context);
+      (new ProLine(pt4, pt2)).draw(context);
+    }
+  },
+
+  draw_intersections: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+
+      context.noFill();
+      context.stroke(23,78,102);
+      (new ProTriangle(this.circle.cpt, cc.cpt, cc.next_circle.cpt)).draw(context);
+    }
+  },
+
+  draw_circles: function(context) {
+    context.noFill();
+    context.stroke(0,255,100);
+    var subs = this.sub_circles();
+    for ( c in subs ) { subs[c].draw(context); }
+    this.circle.draw(context);
+  },
+
+  new_masters: function() {
+    var subs = this.sub_circles();
+    var ret_val = [];
+    for ( c in subs ) { 
+      ret_val.push(new MasterCircle( subs[c].cpt.clone(), subs[c].radius, 
+                                     this.num_of_points));
+    }
+    return ret_val;
+  },
+};
+
+var master_circle = new MasterCircle(new ProPoint(300,300), 250, 6);
+var generation = 0;
+var masters = master_circle.new_masters();
+
+void setup() {
+  size(600, 600);
+  frameRate(1);
+  background(#001100);
+}
+
+void draw() {
+  if ( generation == 0 ) {
+    master_circle.draw_circles(this);
+  } else if ( generation == 1 ) {
+    master_circle.draw_intersections(this);
+  } else if ( generation == 2 ) {
+    master_circle.draw_more_intersections(this);
+   } else if ( generation == 3 ) {
+     master_circle.draw_even_more_intersections(this);
+//   } else if ( generation == 1 ) {
+//     for (idx in masters) { masters[idx].draw_intersections(this); }
+//   } else if ( generation == 2 ) {
+//     for (idx in masters) { masters[idx].draw_more_intersections(this); }
+  } else {
+    exit(); 
+  }
+
+  generation += 1;
+}
+

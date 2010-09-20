@@ -65,9 +65,96 @@ ProPoint.prototype = {
     }
     return array_of_points[ret_idx];
   },
+  
+  draw: function(context) {
+    context.vertex(this.x,this.y);
+  }
 };
 
 var ProOrigin = new ProPoint(0,0);
+
+var ProLine = function(pt1, pt2) {
+  this.points = [pt1,pt2];
+  this.c = null;
+  this.slope = null;
+  this.yinsect = null;
+
+  try {
+    this.slope = pt1.slope(pt2);
+    this.yinsect = pt1.y - (this.slope * pt1.x);
+  } catch (err) {
+    if ( err == "SamePointError") {
+      alert("SamePointError");
+    } else if ( err == "PointsVerticalError" ) {
+      this.c = pt1.x;
+    }
+  }
+};
+
+ProLine.prototype = {
+  is_vertical: function() {
+    return this.c != null;
+  },
+  is_parallel: function(lne) {
+    return ( (this.is_vertical() && lne.is_vertical()) || this.slope == lne.slope );
+  },
+
+  // Intersection method is taken from
+  //   http://www.kevlindev.com/gui/math/intersection/Intersection.js
+  // and is copyright 2002-2003, Kevin Lindsey
+  intersection: function( lne ) {
+    var a1 = this.points[0];
+    var a2 = this.points[1];
+    var b1 = lne.points[0];
+    var b2 = lne.points[1];
+
+    var ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x);
+    var ub_t = (a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x);
+    var u_b  = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+
+    if ( u_b != 0 ) {
+        var ua = ua_t / u_b;
+        var ub = ub_t / u_b;
+        if ( 0 <= ua && ua <= 1 && 0 <= ub && ub <= 1 ) {
+          return new ProPoint(
+                    a1.x + ua * (a2.x - a1.x),
+                    a1.y + ua * (a2.y - a1.y));
+        }
+    }
+    return null;
+  },
+
+  on_line: function( pt ) {
+    if ( this.is_vertical() ) {
+      return (pt.x > this.c * 0.99) && (pt.x < this.c * 1.01);
+    } else {
+      var t = ((this.slope * pt.x) + this.yinsect);
+      return (pt.y < t * 1.01 && pt.y > t * 0.99);
+    }
+  },
+
+  equals: function(obj) {
+    return this.is_line(obj) && ( this.points_equals(obj.points) || 
+                                  this.points_equals([obj.points[1],obj.points[0]]));
+  },
+
+  is_line: function(obj) {
+    return obj.is_line != undefined;
+  },
+
+  points_equals: function( ap ) {
+    return this.points[0].equals(ap[0]) && this.points[1].equals(ap[1]);
+  },
+
+  clone: function() {
+    return new ProLine( this.points[0].clone(), this.points[1].clone());
+  },
+  
+  draw: function(context) {
+    var p = this.points;
+    context.line( p[0].x, p[0].y, p[1].x, p[1].y);
+  }
+};
 
 var ProCircle = function(center, radius) {
   this.cpt = center;
