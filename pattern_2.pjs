@@ -32,7 +32,11 @@ MasterCircle.prototype = {
     return sub_circles;
   },
   
-  draw_more_intersections: function(context) {
+  draw_phase_3: function(context) {
+    context.exit();
+  },
+
+  draw_phase_3: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -44,7 +48,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_intersections: function(context) {
+  draw_phase_2: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -59,11 +63,18 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_circles: function(context) {
+  draw_phase_1: function(context) {
     context.noFill();
     context.stroke(0,255,100);
     var subs = this.sub_circles();
     for ( c in subs ) { subs[c].draw(context); }
+    this.circle.draw(context);
+  },
+
+  draw_phase_0: function(context) {
+    context.noFill();
+    context.stroke(0,255,100);
+    var subs = this.sub_circles();
     this.circle.draw(context);
   },
 
@@ -78,8 +89,8 @@ MasterCircle.prototype = {
   },
 };
 
-var master_circle = new MasterCircle(new ProPoint(300,300), 50, 12);
-var generation = 0;
+var master_circle = new MasterCircle(new ProPoint(300,300), 150, 12);
+var phase = -1;
 var masters = master_circle.new_masters();
 
 void setup() {
@@ -89,21 +100,24 @@ void setup() {
 }
 
 void draw() {
-  if ( generation == 3 ) {
-//    master_circle.draw_circles(this);
-  } else if ( generation == 4 ) {
-    master_circle.draw_intersections(this);
-  } else if ( generation == 5 ) {
-    master_circle.draw_more_intersections(this);
-  } else if ( generation == 0 ) {
-//    for (idx in masters) { masters[idx].draw_circles(this); }
-  } else if ( generation == 1 ) {
-    for (idx in masters) { masters[idx].draw_intersections(this); }
-  } else if ( generation == 2 ) {
-    for (idx in masters) { masters[idx].draw_more_intersections(this); }
-  } else {
-    exit(); 
-  }
-  generation += 1;
+  phase += 1;
+  eval( "master_circle.draw_phase_" + phase + "(this)");
+
+//   if ( generation == 3 ) {
+//     master_circle.draw_circles(this);
+//   } else if ( generation == 4 ) {
+//     master_circle.draw_intersections(this);
+//   } else if ( generation == 5 ) {
+//     master_circle.draw_more_intersections(this);
+//   } else if ( generation == 0 ) {
+// //    for (idx in masters) { masters[idx].draw_circles(this); }
+//   } else if ( generation == 1 ) {
+//     for (idx in masters) { masters[idx].draw_intersections(this); }
+//   } else if ( generation == 2 ) {
+//     for (idx in masters) { masters[idx].draw_more_intersections(this); }
+//   } else {
+//     exit(); 
+//   }
+//   generation += 1;
 }
 
