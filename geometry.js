@@ -13,7 +13,22 @@ ProPoint.prototype = {
   v_length: function() {
     return Math.sqrt((this.x * this.x) + (this.y * this.y));
   },
-  
+  v_dot_product: function(  pt ){
+    return ( (this.x * pt.x) + (this.y * pt.y) );
+  },
+
+  v_angle: function(  pt ){
+    return Math.acos( this.v_dot_product( pt ) / (this.v_length() * pt.v_length()) );
+  },
+
+  v_svg_angle: function( pt ) {
+    var sign       = (((this.x*pt.y) - (this.y*pt.x)) >= 0);
+    var dprod      = this.v_dot_product( pt );
+    var veclengths = this.v_length() * pt.v_length();
+    var acval      = Math.abs(Math.acos( dprod / veclengths ));
+    return (sign ? acval : -acval);
+  },
+
   equals: function( pt ) {
     return this.is_point(pt) && (this.x == pt.x && this.y == pt.y);
   },
@@ -344,9 +359,8 @@ ProDrawStack.prototype = {
   },
 
   push: function(obj) {
-//     if ( ! this.contains_obj(obj) ) { 
-      this.stack.push(obj); 
-//     }
+    this.stack.push(obj);
+    return this;
   },
 
   contains_obj: function( obj) {

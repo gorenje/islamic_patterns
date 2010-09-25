@@ -32,7 +32,76 @@ MasterCircle.prototype = {
     return sub_circles;
   },
   
-  draw_even_more_intersections: function(context) {
+  draw_phase_6: function(context) {
+    context.exit();
+  },
+
+  draw_phase_4: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+
+      stroke(255, 255, 255);
+      noFill();
+
+      var pt1 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+      var pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+      var pt3 = cc.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+      var pt4 = cc.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+
+      (l1 = new ProLine(pt1, pt3));
+      (l2 = new ProLine(pt4, pt2));
+      var topTr = l1.intersection(l2);
+
+      pt1 = this.circle.cpt.point_on_segment(cc.cpt, 3/4);
+      pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+      (l3 = new ProLine(pt1, pt2));
+
+      var botL = l1.intersection(l3);
+      var botR = l2.intersection(l3);
+
+      var lines = [
+        new ProLine( botR, cc.cpt.point_on_segment(botR,2.0)),
+        new ProLine( botL, cc.next_circle.cpt.point_on_segment(botL,2.0)),
+        new ProLine( topTr, this.circle.cpt.point_on_segment(topTr,2.0))
+      ];
+
+      var center_of_triangle = lines[2].intersection(lines[1]);
+
+      var pt2 = topTr.point_on_segment(center_of_triangle, 2);
+      var pt4 = botR.point_on_segment(pt2, 2);
+
+      (l1 = new ProLine(pt4, this.circle.cpt)); //.draw(context);
+      var pt10 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+      var pt11 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
+      var pt13 = this.circle.cpt.point_on_segment(cc.cpt, 2/4);
+      (l2 = new ProLine(pt10, pt11)); //.draw(context);
+
+      var pt12 = l1.intersection(l2);
+      (new ProCircle(pt12,5)).draw(context);
+      (new ProCircle(pt13,5)).draw(context);
+      var pt14 = pt12.point_on_segment(pt13,2);
+
+      (new ProCircle(pt14,5)).draw(context);
+      alert( "sd");
+
+      bezier(this.circle.cpt.x, this.circle.cpt.y, 
+             pt12.x,pt12.y, pt12.x,pt12.y, pt13.x, pt13.y);
+
+      bezier(cc.cpt.x, cc.cpt.y, 
+             pt14.x,pt14.y, pt14.x,pt14.y, pt13.x, pt13.y);
+
+      var pt15 = cc.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
+      (new ProCircle(pt15,5)).draw(context);
+
+      bezier(cc.cpt.x, cc.cpt.y, 
+             pt14.x,pt14.y, pt14.x,pt14.y, pt15.x, pt15.y);
+      bezier(cc.next_circle.cpt.x, cc.next_circle.cpt.y,
+             pt14.x,pt14.y, pt14.x,pt14.y, pt15.x, pt15.y);
+    }
+  },
+
+  draw_phase_5: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -53,7 +122,6 @@ MasterCircle.prototype = {
       (l3 = new ProLine(pt1, pt2));
 
       var botL = l1.intersection(l3);
- 
       var botR = l2.intersection(l3);
       
       var lines = [
@@ -75,8 +143,9 @@ MasterCircle.prototype = {
       var pt8 = pt2.point_on_segment(botR, 2);
       var pt9 = pt3.point_on_segment(topTr, 2);
 
-      stroke( 255, 155, 55);
-      fill( 255, 155, 55);
+      // TODO do this with a ProDrawStack
+      stroke(255, 155, 55);
+      fill(255, 155, 55);
       context.beginShape();
       botL.draw(context);
       pt4.draw(context);
@@ -91,24 +160,10 @@ MasterCircle.prototype = {
       pt1.draw(context);
       pt7.draw(context);
       context.endShape(CLOSE);
-
-      // start the lines
-//       (new ProLine(botL,  pt4)).draw(context);
-//       (new ProLine(pt4,   pt2)).draw(context);
-//       (new ProLine(pt2,   pt5)).draw(context);
-//       (new ProLine(pt5,   botR)).draw(context);
-//       (new ProLine(botR,  pt8)).draw(context);
-//       (new ProLine(pt8,   pt3)).draw(context);
-//       (new ProLine(pt3,   pt6)).draw(context);
-//       (new ProLine(pt6,   topTr)).draw(context);
-//       (new ProLine(topTr, pt9)).draw(context);
-//       (new ProLine(pt9,   pt1)).draw(context);
-//       (new ProLine(pt1,   pt7)).draw(context);
-//       (new ProLine(pt7,   botL)).draw(context);
     }
   },
 
-  draw_more_intersections: function(context) {
+  draw_phase_3: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -124,7 +179,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_intersections: function(context) {
+  draw_phase_2: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -135,7 +190,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_circles: function(context) {
+  draw_phase_1: function(context) {
     context.noFill();
     context.stroke(0,255,100);
     var subs = this.sub_circles();
@@ -155,35 +210,17 @@ MasterCircle.prototype = {
 };
 
 var master_circle = new MasterCircle(new ProPoint(300,300), 250, 6);
-var generation = 0;
+var phase = 0;
 var masters = master_circle.new_masters();
 
 void setup() {
   size(600, 600);
   frameRate(1);
   background(#001100);
-}
+};
 
 void draw() {
-  master_circle.draw_even_more_intersections(this);
-  exit();
-
-  if ( generation == 0 ) {
-    master_circle.draw_circles(this);
-  } else if ( generation == 1 ) {
-    master_circle.draw_intersections(this);
-  } else if ( generation == 2 ) {
-    master_circle.draw_more_intersections(this);
-   } else if ( generation == 3 ) {
-     master_circle.draw_even_more_intersections(this);
-  } else if ( generation == 4 ) {
-    for (idx in masters) { masters[idx].draw_even_more_intersections(this); }
-//   } else if ( generation == 2 ) {
-//     for (idx in masters) { masters[idx].draw_more_intersections(this); }
-  } else {
-    exit(); 
-  }
-
-  generation += 1;
-}
+  phase += 1;
+  eval( "master_circle.draw_phase_" + phase + "(this)");
+};
 
