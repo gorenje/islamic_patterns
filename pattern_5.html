@@ -1,3 +1,7 @@
 <script src="processing-0.9.7.js"></script>
 <script src="geometry.js"></script>
-<canvas datasrc="pattern_5.pjs" width="200" height="200"></canvas>
+<script src="controls.js"></script>
+<canvas id="the_canvas" datasrc="pattern_5.pjs" width="200" height="200"></canvas>
+<div id="phase_current">None</div>
+<input type=submit onclick="javascript:ctrl_redraw()" value="Repeat"/>
+Just one circle: <input type=checkbox onclick="javascript:ctrl_set_just_one_circle(this)" value=""/>

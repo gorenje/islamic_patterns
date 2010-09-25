@@ -59,18 +59,16 @@ MasterCircle.prototype = {
     return [botL, botR, topTr, center_of_triangle];
   },
 
-  draw_phase_6: function(context) {
-    context.exit();
+  draw_phase_7: function(context) {
+    context.noLoop();
   },
 
-  draw_phase_4: function(context) {
+  draw_phase_5: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
-
-      stroke(255, 255, 255);
-//      noFill();
-      fill(200,34,10);
+      context.noFill();
+      context.noStroke();
 
       var a = this.obtain_triangle_sides(cc);
       var topTr = a[2];
@@ -81,47 +79,57 @@ MasterCircle.prototype = {
       var pt2 = topTr.point_on_segment(center_of_triangle, 2);
       var pt4 = botR.point_on_segment(pt2, 2);
 
-      (l1 = new ProLine(pt4, this.circle.cpt)); //.draw(context);
+      (l1 = new ProLine(pt4, this.circle.cpt));
       var pt10 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
       var pt11 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
       var pt13 = this.circle.cpt.point_on_segment(cc.cpt, 2/4);
-      (l2 = new ProLine(pt10, pt11)); //.draw(context);
+      (l2 = new ProLine(pt10, pt11));
 
       var pt12 = l1.intersection(l2);
-//       (new ProCircle(pt12,5)).draw(context);
-//       (new ProCircle(pt13,5)).draw(context);
-
       var midpoint = pt13.point_on_segment(this.circle.cpt, 1/2);
       var ctrlpt = pt12.point_on_segment(midpoint, PI/10);
-      bezier(this.circle.cpt.x, this.circle.cpt.y, 
-             ctrlpt.x, ctrlpt.y, ctrlpt.x, ctrlpt.y, pt13.x, pt13.y);
-
       var pt14 = ctrlpt.point_on_segment(pt13,2);
-//      (new ProCircle(pt14,5)).draw(context);
-
-      bezier(cc.cpt.x, cc.cpt.y, 
-             pt14.x,pt14.y, pt14.x,pt14.y, pt13.x, pt13.y);
-
       var pt15 = cc.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
-//       (new ProCircle(pt15,5)).draw(context);
-
       var midpt2 = pt15.point_on_segment(cc.cpt, 1/2);
       var ctrlpt2 = midpt2.point_on_segment(pt13, PI/10);
       var ctrlpt3 = ctrlpt2.point_on_segment(pt15, 2);
 
-      bezier(cc.cpt.x, cc.cpt.y, 
-             ctrlpt2.x,ctrlpt2.y, ctrlpt2.x,ctrlpt2.y, pt15.x, pt15.y);
+
+      context.stroke(255, 255, 255);
+
+      if ( idx % 2 == 1 ) {
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
       bezier(cc.next_circle.cpt.x, cc.next_circle.cpt.y,
              ctrlpt3.x,ctrlpt3.y, ctrlpt3.x,ctrlpt3.y, pt15.x, pt15.y);
+
+      bezier(cc.cpt.x, cc.cpt.y, 
+             pt14.x,pt14.y, pt14.x,pt14.y, pt13.x, pt13.y);
+
+      if ( idx % 2 == 0 ) { // invert fill colour
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
+      bezier(this.circle.cpt.x, this.circle.cpt.y, 
+             ctrlpt.x, ctrlpt.y, ctrlpt.x, ctrlpt.y, pt13.x, pt13.y);
+
+      if ( document.getElementById('the_canvas').just_one_circle ) {
+        context.fill(0,0,0);
+      }
+      bezier(cc.cpt.x, cc.cpt.y, 
+             ctrlpt2.x,ctrlpt2.y, ctrlpt2.x,ctrlpt2.y, pt15.x, pt15.y);
     }
   },
 
-  draw_phase_5: function(context) {
+  draw_phase_6: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
       context.noFill();
-      context.stroke( 23,78, 102);
+      context.noStroke();
       
       var a = this.obtain_triangle_sides(cc);
       var topTr = a[2];
@@ -159,6 +167,20 @@ MasterCircle.prototype = {
     }
   },
 
+  draw_phase_4: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noStroke();
+      if ( idx % 2 == 1 ) {
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
+      (new ProTriangle(this.circle.cpt, cc.cpt, cc.next_circle.cpt)).draw(context);
+    }
+  },
+
   draw_phase_3: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
@@ -179,7 +201,6 @@ MasterCircle.prototype = {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
-
       context.noFill();
       context.stroke(23,78,102);
       (new ProTriangle(this.circle.cpt, cc.cpt, cc.next_circle.cpt)).draw(context);
@@ -212,39 +233,48 @@ MasterCircle.prototype = {
 
 // Set this to 0 to see all the guiding circles and triangles, set to 3
 // to see just the end result.
-var phase = 3;
-
-var just_one_circle = false;
+var cnvs = document.getElementById('the_canvas');
+cnvs.just_one_circle = false;
 var base_radius = 150;
-if ( just_one_circle ) {
+
+if ( cnvs.just_one_circle ) {
   base_radius = 150;
 } else {
   base_radius = 75;
 }
+
+cnvs.set_just_one_circle = function(val) {
+  this.just_one_circle = val;
+};
+
 // End of Configuration
 
 var master_circle = new MasterCircle(new ProPoint(300,300), base_radius, 6);
 var masters = master_circle.new_masters();
+var info = document.getElementById("phase_current");
 
 void setup() {
+  cnvs.phase = 0;
   size(600, 600);
   frameRate(1);
-  background(#001100);
+  background(#000000);
 };
 
 void draw() {
-  phase += 1;
-  if ( just_one_circle ) {
-    eval( "master_circle.draw_phase_" + phase + "(this)");
+  cnvs.phase += 1;
+  info.innerHTML = "Frame: " + cnvs.phase;
+
+  if ( cnvs.just_one_circle ) {
+    eval( "master_circle.draw_phase_" + cnvs.phase + "(this)");
   } else {
     for ( idx in masters ) {
-      eval( "masters[idx].draw_phase_" + phase + "(this)");
+      eval( "masters[idx].draw_phase_" + cnvs.phase + "(this)");
       var m2 = masters[idx].new_masters();
       for ( idx2 in m2) {
-        eval( "m2[idx2].draw_phase_" + phase + "(this)");
+        eval( "m2[idx2].draw_phase_" + cnvs.phase + "(this)");
         var m3 = m2[idx2].new_masters();
         for ( idx3 in m3) {
-          eval( "m3[idx3].draw_phase_" + phase + "(this)");
+          eval( "m3[idx3].draw_phase_" + cnvs.phase + "(this)");
         }
       }
     }
