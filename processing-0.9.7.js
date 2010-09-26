@@ -13075,6 +13075,8 @@
     }
   };
 
+  Processing.reload = init;
+
   document.addEventListener('DOMContentLoaded', function() {
     init();
   }, false);
