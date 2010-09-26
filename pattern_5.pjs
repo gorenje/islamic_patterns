@@ -235,26 +235,22 @@ MasterCircle.prototype = {
 // to see just the end result.
 var cnvs = document.getElementById('the_canvas');
 cnvs.just_one_circle = false;
-var base_radius = 150;
-
-if ( cnvs.just_one_circle ) {
-  base_radius = 150;
-} else {
-  base_radius = 75;
-}
 
 cnvs.set_just_one_circle = function(val) {
   this.just_one_circle = val;
 };
 
-// End of Configuration
+cnvs.setup_circle = function(val) {
+  var base_radius = this.just_one_circle ? 150 : 75;
+  this.master_circle = new MasterCircle(new ProPoint(300,300), base_radius, 6);
+};
 
-var master_circle = new MasterCircle(new ProPoint(300,300), base_radius, 6);
-var masters = master_circle.new_masters();
 var info = document.getElementById("phase_current");
 
 void setup() {
   cnvs.phase = 0;
+  cnvs.setup_circle();
+
   size(600, 600);
   frameRate(1);
   background(#000000);
@@ -265,8 +261,9 @@ void draw() {
   info.innerHTML = "Frame: " + cnvs.phase;
 
   if ( cnvs.just_one_circle ) {
-    eval( "master_circle.draw_phase_" + cnvs.phase + "(this)");
+    eval( "cnvs.master_circle.draw_phase_" + cnvs.phase + "(this)");
   } else {
+    var masters = cnvs.master_circle.new_masters();
     for ( idx in masters ) {
       eval( "masters[idx].draw_phase_" + cnvs.phase + "(this)");
       var m2 = masters[idx].new_masters();
