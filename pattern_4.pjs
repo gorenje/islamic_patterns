@@ -160,7 +160,7 @@ void draw() {
 //   } else if ( generation == 2 ) {
 //     for (idx in masters) { masters[idx].draw_more_intersections(this); }
   } else {
-    exit(); 
+    noLoop();
   }
 
   generation += 1;

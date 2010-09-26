@@ -227,10 +227,6 @@ MasterCircle.prototype = {
 };
 
 
-// *************
-// Configuration
-// *************
-
 // Set this to 0 to see all the guiding circles and triangles, set to 3
 // to see just the end result.
 var cnvs = document.getElementById('the_canvas');

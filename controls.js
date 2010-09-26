@@ -19,3 +19,7 @@ function ctrl_set_just_one_circle(obj) {
   cnvs.set_just_one_circle(obj.checked);
   return false;
 }
+
+function ctrl_show_guides(obj) {
+  return false;
+}

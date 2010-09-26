@@ -32,8 +32,8 @@ MasterCircle.prototype = {
     return sub_circles;
   },
   
-  draw_phase_3: function(context) {
-    context.exit();
+  draw_phase_4: function(context) {
+    context.noLoop();
   },
 
   draw_phase_3: function(context) {
