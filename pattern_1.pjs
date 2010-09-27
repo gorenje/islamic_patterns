@@ -5,7 +5,6 @@ var MasterCircle = function( cpt, radius, num_of_points ) {
   this.num_of_points = num_of_points;
   this.circle = new ProCircle( cpt, radius );
   this.factor_larger = 1.5; // change this to make rects + triangles bigger/smaller
-  this.draw_the_circles = 2; // set to one to not draw circles
 };
 
 MasterCircle.prototype = {
@@ -32,7 +31,11 @@ MasterCircle.prototype = {
     return sub_circles;
   },
   
-  draw_intersections: function(context) {
+  draw_phase_4: function(context) {
+    context.noLoop();
+  },
+
+  draw_phase_3: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -47,31 +50,42 @@ MasterCircle.prototype = {
       var pt2 = pt3.closest(pts1_2);
       var pt1 = pt6.closest(pts1_2);
 
-      draw_stack.push(new ProColorSetting("stroke(23,255,10)"));
-      draw_stack.push(new ProColorSetting("fill(23,200,10)"));
-      draw_stack.push(new ProTriangle(pt1, pt6, pt5));
-      draw_stack.push(new ProTriangle(pt2, pt4, pt3));
-      draw_stack.push(new ProColorSetting("fill(200,23,10)"));
-      draw_stack.push(new ProColorSetting("stroke(255,23,10)"));
-      draw_stack.push(new ProRect(pt4, pt3, pt6, pt5));
-
-      if ( this.draw_the_circles == 2 ) {
-        context.noFill();
-        context.stroke(0,255,100);
-        cc.draw(context);
-        this.circle.draw(context);
-      }
+      context.stroke(23,255,10);
+      context.fill(23,200,10);
+      new ProTriangle(pt1, pt6, pt5).draw(context);
+      new ProTriangle(pt2, pt4, pt3).draw(context);
+      context.fill(200,23,10);
+      context.stroke(255,23,10);
+      new ProRect(pt4, pt3, pt6, pt5).draw(context);
     }
   },
 
-  draw: function(context) {
-    if ( this.draw_the_circles != 1 ) {
-      this.draw_intersections(context);
-    } else {
-      var subs = this.sub_circles();
-      for ( c in subs ) { subs[c].draw(context); }
+  draw_phase_2: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+
+      var pts1_2 = this.circle.intersection( cc );
+
+      var pt3 = cc.closest(this.circle.intersection(cc.next_circle));
+      var pt4 = this.circle.closest(cc.intersection(cc.next_circle));
+      var pt5 = this.circle.closest(cc.intersection(cc.prev_circle));
+      var pt6 = cc.closest(this.circle.intersection(cc.prev_circle));
+      
+      var pt2 = pt3.closest(pts1_2);
+      var pt1 = pt6.closest(pts1_2);
+      
+      context.noFill();
+      context.stroke(0,255,100);
+      cc.draw(context);
       this.circle.draw(context);
     }
+  },
+
+  draw_phase_1: function(context) {
+    var subs = this.sub_circles();
+    for ( c in subs ) { subs[c].draw(context); }
+    this.circle.draw(context);
   },
 
   new_masters: function() {
@@ -85,33 +99,7 @@ MasterCircle.prototype = {
   },
 };
 
-var draw_stack = new ProDrawStack();
-var base_radius = 45;
-var master_circle = new MasterCircle(new ProPoint(300,300), base_radius, 6);
-var masters = [master_circle];
-var global_counter = 0;
+var cnvs = document.getElementById('the_canvas');
+cnvs.base_radius = 45;
 
-void setup() {
-  size(600, 600);
-  frameRate(2);
-  background(#001100);
-}
-
-void draw() {
-  var new_masters = [];
-  for ( idx in masters ) {
-    var m2 = masters[idx].new_masters();
-    for ( idx2 in m2 ) { new_masters.push(m2[idx2]); }
-    masters[idx].draw(this);
-  }
-
-  draw_stack.draw(this);
-  draw_stack.clear();
-
-  masters = new_masters;
-  global_counter += 1;
-  if ( global_counter == 4) { 
-    noLoop();
-  }
-}
 

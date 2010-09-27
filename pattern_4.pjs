@@ -31,8 +31,12 @@ MasterCircle.prototype = {
     }
     return sub_circles;
   },
-  
-  draw_even_more_intersections: function(context) {
+
+  draw_phase_5: function(context) {
+    context.noLoop();
+  },
+
+  draw_phase_4: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -90,7 +94,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_more_intersections: function(context) {
+  draw_phase_3: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -106,7 +110,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_intersections: function(context) {
+  draw_phase_2: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
       var cc = subs[idx];
@@ -117,7 +121,7 @@ MasterCircle.prototype = {
     }
   },
 
-  draw_circles: function(context) {
+  draw_phase_1: function(context) {
     context.noFill();
     context.stroke(0,255,100);
     var subs = this.sub_circles();
@@ -136,33 +140,6 @@ MasterCircle.prototype = {
   },
 };
 
-var master_circle = new MasterCircle(new ProPoint(300,300), 250, 6);
-var generation = 0;
-var masters = master_circle.new_masters();
 
-void setup() {
-  size(600, 600);
-  frameRate(1);
-  background(#001100);
-}
-
-void draw() {
-  if ( generation == 0 ) {
-    master_circle.draw_circles(this);
-  } else if ( generation == 1 ) {
-    master_circle.draw_intersections(this);
-  } else if ( generation == 2 ) {
-    master_circle.draw_more_intersections(this);
-   } else if ( generation == 3 ) {
-     master_circle.draw_even_more_intersections(this);
-//   } else if ( generation == 1 ) {
-//     for (idx in masters) { masters[idx].draw_intersections(this); }
-//   } else if ( generation == 2 ) {
-//     for (idx in masters) { masters[idx].draw_more_intersections(this); }
-  } else {
-    noLoop();
-  }
-
-  generation += 1;
-}
-
+var cnvs = document.getElementById('the_canvas');
+cnvs.bgcolour = 255;

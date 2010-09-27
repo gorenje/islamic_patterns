@@ -4,7 +4,8 @@ function ctrl_redraw() {
   var regexp = new RegExp(datasrc);
 
   if ( !regexp.test(cnvs_container.innerHTML) ) {
-    cnvs_container.innerHTML = '<canvas id="the_canvas" datasrc="'+datasrc+'"></canvas>';
+    cnvs_container.innerHTML = ['<canvas id="the_canvas" data-processing-sources="',
+                                [datasrc,'setup_canvas.js'].join(' '), '"></canvas>'].join('');
     Processing.reload();
   }
   

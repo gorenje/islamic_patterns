@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="de" xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+<head>
+<title>Patterns</title>
+<script src="processing-0.9.7.js"></script>
+<script src="geometry.js"></script>
+<script src="controls.js"></script>
+</head>
+<body>
+
+Inspired by <a href="http://www.amazon.de/Islamic-Patterns-Analytical-Cosmological-Approach/dp/0500270716/ref=sr_1_1?ie=UTF8&s=books-intl-de&qid=1285012540&sr=8-1">Islamic Patterns: An Analytical and Cosmological Approach</a>
+
+<div id="canvas_container">
+  <canvas id="the_canvas" data-processing-sources="pattern_5.pjs setup_canvas.js"></canvas>
+</div>
+
+<div id="phase_current">None</div>
+
+<input type=submit onclick="javascript:ctrl_redraw()" value="Redraw"/>
+
+Just one circle: 
+<input type=checkbox onclick="javascript:ctrl_set_just_one_circle(this)" value=""/>
+
+Show guides: 
+<input type=checkbox onclick="javascript:ctrl_show_guides(this)" value=""/>
+
+Pattern:
+<select id="pattern_selection">
+ <option value="1">1</option>
+ <option value="2">2</option>
+ <option value="3">3</option>
+ <option value="4">4</option>
+ <option selected=selected value="5">5</option>
+</select>
+
+</body>
+</html>

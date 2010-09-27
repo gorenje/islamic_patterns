@@ -63,6 +63,49 @@ MasterCircle.prototype = {
     context.noLoop();
   },
 
+  draw_phase_6: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noFill();
+      context.noStroke();
+      
+      var a = this.obtain_triangle_sides(cc);
+      var topTr = a[2];
+      var botL = a[0];
+      var botR = a[1];
+      var center_of_triangle = a[3];
+
+      var pt2 = topTr.point_on_segment(center_of_triangle, 2);
+      var pt3 = botL.point_on_segment(center_of_triangle, 2);
+      var pt1 = botR.point_on_segment(center_of_triangle, 2);
+
+      var pt4 = botR.point_on_segment(pt2, 2);
+      var pt5 = botL.point_on_segment(pt2, 2);
+      var pt6 = botR.point_on_segment(pt3, 2);
+      var pt7 = topTr.point_on_segment(pt1, 2);
+      var pt8 = pt2.point_on_segment(botR, 2);
+      var pt9 = pt3.point_on_segment(topTr, 2);
+
+      stroke(255, 155, 55);
+      fill(255, 155, 55);
+      context.beginShape();
+      botL.draw(context);
+      pt4.draw(context);
+      pt2.draw(context);
+      pt5.draw(context);
+      botR.draw(context);
+      pt8.draw(context);
+      pt3.draw(context);
+      pt6.draw(context);
+      topTr.draw(context);
+      pt9.draw(context);
+      pt1.draw(context);
+      pt7.draw(context);
+      context.endShape(CLOSE);
+    }
+  },
+
   draw_phase_5: function(context) {
     var subs = this.sub_circles();
     for ( var idx = 0; idx < this.num_of_points; idx++ ) {
@@ -121,49 +164,6 @@ MasterCircle.prototype = {
       }
       bezier(cc.cpt.x, cc.cpt.y, 
              ctrlpt2.x,ctrlpt2.y, ctrlpt2.x,ctrlpt2.y, pt15.x, pt15.y);
-    }
-  },
-
-  draw_phase_6: function(context) {
-    var subs = this.sub_circles();
-    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
-      var cc = subs[idx];
-      context.noFill();
-      context.noStroke();
-      
-      var a = this.obtain_triangle_sides(cc);
-      var topTr = a[2];
-      var botL = a[0];
-      var botR = a[1];
-      var center_of_triangle = a[3];
-
-      var pt2 = topTr.point_on_segment(center_of_triangle, 2);
-      var pt3 = botL.point_on_segment(center_of_triangle, 2);
-      var pt1 = botR.point_on_segment(center_of_triangle, 2);
-
-      var pt4 = botR.point_on_segment(pt2, 2);
-      var pt5 = botL.point_on_segment(pt2, 2);
-      var pt6 = botR.point_on_segment(pt3, 2);
-      var pt7 = topTr.point_on_segment(pt1, 2);
-      var pt8 = pt2.point_on_segment(botR, 2);
-      var pt9 = pt3.point_on_segment(topTr, 2);
-
-      stroke(255, 155, 55);
-      fill(255, 155, 55);
-      context.beginShape();
-      botL.draw(context);
-      pt4.draw(context);
-      pt2.draw(context);
-      pt5.draw(context);
-      botR.draw(context);
-      pt8.draw(context);
-      pt3.draw(context);
-      pt6.draw(context);
-      topTr.draw(context);
-      pt9.draw(context);
-      pt1.draw(context);
-      pt7.draw(context);
-      context.endShape(CLOSE);
     }
   },
 
@@ -227,50 +227,4 @@ MasterCircle.prototype = {
 };
 
 
-// Set this to 0 to see all the guiding circles and triangles, set to 3
-// to see just the end result.
-var cnvs = document.getElementById('the_canvas');
-cnvs.just_one_circle = false;
-
-cnvs.set_just_one_circle = function(val) {
-  this.just_one_circle = val;
-};
-
-cnvs.setup_circle = function(val) {
-  var base_radius = this.just_one_circle ? 150 : 75;
-  this.master_circle = new MasterCircle(new ProPoint(300,300), base_radius, 6);
-};
-
-var info = document.getElementById("phase_current");
-
-void setup() {
-  cnvs.phase = 0;
-  cnvs.setup_circle();
-
-  size(600, 600);
-  frameRate(1);
-  background(#000000);
-};
-
-void draw() {
-  cnvs.phase += 1;
-  info.innerHTML = "Frame: " + cnvs.phase;
-
-  if ( cnvs.just_one_circle ) {
-    eval( "cnvs.master_circle.draw_phase_" + cnvs.phase + "(this)");
-  } else {
-    var masters = cnvs.master_circle.new_masters();
-    for ( idx in masters ) {
-      eval( "masters[idx].draw_phase_" + cnvs.phase + "(this)");
-      var m2 = masters[idx].new_masters();
-      for ( idx2 in m2) {
-        eval( "m2[idx2].draw_phase_" + cnvs.phase + "(this)");
-        var m3 = m2[idx2].new_masters();
-        for ( idx3 in m3) {
-          eval( "m3[idx3].draw_phase_" + cnvs.phase + "(this)");
-        }
-      }
-    }
-  }
-};
 
