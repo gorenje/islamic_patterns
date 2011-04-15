@@ -1,0 +1,233 @@
+// -*- js2 -*-
+// 	Processing.js Example
+
+var MasterCircle = function( cpt, radius, num_of_points ) {
+  this.num_of_points = num_of_points;
+  this.circle = new ProCircle( cpt, radius );
+  this.factor_larger = PI/2.6;
+};
+
+MasterCircle.prototype = {
+  sub_circles: function() {
+    var pts = this.circle.points(this.num_of_points);
+    var sub_circles = new Array();
+    var n_circle = null;
+    var p_circle = null;
+    
+    for ( idx in pts ) {
+      var center_pt = this.circle.cpt.point_on_segment(pts[idx], this.factor_larger);
+      var circle = new ProCircle(center_pt, this.circle.radius);
+      circle.prev_circle = p_circle;
+      sub_circles[idx] = circle;
+      p_circle = circle;
+    }
+
+    sub_circles[0].prev_circle = sub_circles[this.num_of_points - 1];
+    n_circle = sub_circles[0];
+    for ( var idx = this.num_of_points - 1; idx > -1; idx-- ) {
+      sub_circles[idx].next_circle = n_circle;
+      n_circle = sub_circles[idx];
+    }
+    return sub_circles;
+  },
+  
+  obtain_triangle_sides: function(cc) {
+    var pt1 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+    var pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+    var pt3 = cc.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+    var pt4 = cc.cpt.point_on_segment(cc.next_circle.cpt, 1/4);
+
+    (l1 = new ProLine(pt1, pt3));
+    (l2 = new ProLine(pt4, pt2));
+    var topTr = l1.intersection(l2);
+
+    pt1 = this.circle.cpt.point_on_segment(cc.cpt, 3/4);
+    pt2 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 3/4);
+    (l3 = new ProLine(pt1, pt2));
+
+    var botL = l1.intersection(l3);
+    var botR = l2.intersection(l3);
+    
+    var lines = [
+      new ProLine( botR, cc.cpt.point_on_segment(botR,2.0)),
+      new ProLine( botL, cc.next_circle.cpt.point_on_segment(botL,2.0)),
+      new ProLine( topTr, this.circle.cpt.point_on_segment(topTr,2.0))
+    ];
+    
+    var center_of_triangle = lines[2].intersection(lines[1]);
+    return [botL, botR, topTr, center_of_triangle];
+  },
+
+  draw_phase_7: function(context) {
+    context.noLoop();
+  },
+
+  draw_phase_6: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noFill();
+      context.noStroke();
+      
+      var a = this.obtain_triangle_sides(cc);
+      var topTr = a[2];
+      var botL = a[0];
+      var botR = a[1];
+      var center_of_triangle = a[3];
+
+      var pt2 = topTr.point_on_segment(center_of_triangle, 2);
+      var pt3 = botL.point_on_segment(center_of_triangle, 2);
+      var pt1 = botR.point_on_segment(center_of_triangle, 2);
+
+      var pt4 = botR.point_on_segment(pt2, 2);
+      var pt5 = botL.point_on_segment(pt2, 2);
+      var pt6 = botR.point_on_segment(pt3, 2);
+      var pt7 = topTr.point_on_segment(pt1, 2);
+      var pt8 = pt2.point_on_segment(botR, 2);
+      var pt9 = pt3.point_on_segment(topTr, 2);
+
+      stroke(255, 155, 55);
+      fill(255, 155, 55);
+      context.beginShape();
+      botL.draw(context);
+      pt4.draw(context);
+      pt2.draw(context);
+      pt5.draw(context);
+      botR.draw(context);
+      pt8.draw(context);
+      pt3.draw(context);
+      pt6.draw(context);
+      topTr.draw(context);
+      pt9.draw(context);
+      pt1.draw(context);
+      pt7.draw(context);
+      context.endShape(CLOSE);
+    }
+  },
+
+  draw_phase_5: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noFill();
+      context.noStroke();
+
+      var a = this.obtain_triangle_sides(cc);
+      var topTr = a[2];
+      var botL = a[0];
+      var botR = a[1];
+      var center_of_triangle = a[3];
+
+      var pt2 = topTr.point_on_segment(center_of_triangle, 2);
+      var pt4 = botR.point_on_segment(pt2, 2);
+
+      (l1 = new ProLine(pt4, this.circle.cpt));
+      var pt10 = this.circle.cpt.point_on_segment(cc.cpt, 1/4);
+      var pt11 = this.circle.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
+      var pt13 = this.circle.cpt.point_on_segment(cc.cpt, 2/4);
+      (l2 = new ProLine(pt10, pt11));
+
+      var pt12 = l1.intersection(l2);
+      var midpoint = pt13.point_on_segment(this.circle.cpt, 1/2);
+      var ctrlpt = pt12.point_on_segment(midpoint, PI/10);
+      var pt14 = ctrlpt.point_on_segment(pt13,2);
+      var pt15 = cc.cpt.point_on_segment(cc.next_circle.cpt, 2/4);
+      var midpt2 = pt15.point_on_segment(cc.cpt, 1/2);
+      var ctrlpt2 = midpt2.point_on_segment(pt13, PI/10);
+      var ctrlpt3 = ctrlpt2.point_on_segment(pt15, 2);
+
+
+      context.stroke(255, 255, 255);
+
+      if ( idx % 2 == 1 ) {
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
+      bezier(cc.next_circle.cpt.x, cc.next_circle.cpt.y,
+             ctrlpt3.x,ctrlpt3.y, ctrlpt3.x,ctrlpt3.y, pt15.x, pt15.y);
+
+      bezier(cc.cpt.x, cc.cpt.y, 
+             pt14.x,pt14.y, pt14.x,pt14.y, pt13.x, pt13.y);
+
+      if ( idx % 2 == 0 ) { // invert fill colour
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
+      bezier(this.circle.cpt.x, this.circle.cpt.y, 
+             ctrlpt.x, ctrlpt.y, ctrlpt.x, ctrlpt.y, pt13.x, pt13.y);
+
+      if ( document.getElementById('the_canvas').just_one_circle ) {
+        context.fill(0,0,0);
+      }
+      bezier(cc.cpt.x, cc.cpt.y, 
+             ctrlpt2.x,ctrlpt2.y, ctrlpt2.x,ctrlpt2.y, pt15.x, pt15.y);
+    }
+  },
+
+  draw_phase_4: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      context.noStroke();
+      if ( idx % 2 == 1 ) {
+        context.fill(200,34,10);
+      } else {
+        context.fill(100,34,10);
+      }
+      (new ProTriangle(this.circle.cpt, cc.cpt, cc.next_circle.cpt)).draw(context);
+    }
+  },
+
+  draw_phase_3: function(context) {
+    context.noLoop();
+  },
+
+  draw_phase_2: function(context) {
+    var subs = this.sub_circles();
+    for ( var idx = 0; idx < this.num_of_points; idx++ ) {
+      var cc = subs[idx];
+      var l1, l2;
+      context.noFill();
+
+      var pts1 = cc.intersection(this.circle);
+      var pts2 = cc.next_circle.intersection(this.circle);
+      context.stroke(230,78, 202);
+      var t = this.max_apart(pts2, pts1);
+      (l1 = new ProLine( t[0], t[1])).draw(context);
+      context.stroke(30,78,20);
+      (l2 = new ProLine(pts1[0], pts1[1])).draw(context);
+      var p = l1.intersection(l2);
+      new ProCircle(p, 5).draw(context);
+    }
+  },
+
+  max_apart: function(pts1, pts2) {
+    var pt1 = pts1[0].furthest(pts2);
+    var pt2 = pts1[1].furthest(pts2);
+    return (pt1.distance(pts1[0]) > pt2.distance(pts1[1]) ? [pt1,pts1[0]] : [pt2,pts1[1]]);
+  },
+
+  draw_phase_1: function(context) {
+    context.noFill();
+    context.stroke(0,255,100);
+    var subs = this.sub_circles();
+    for ( c in subs ) { subs[c].draw(context); }
+    this.circle.draw(context);
+  },
+
+  new_masters: function() {
+    var subs = this.sub_circles();
+    var ret_val = [];
+    for ( c in subs ) { 
+      ret_val.push(new MasterCircle( subs[c].cpt.clone(), subs[c].radius, 
+                                     this.num_of_points));
+    }
+    return ret_val;
+  },
+};
+
+var cnvs = document.getElementById('the_canvas');
+cnvs.just_one_circle = true;
+cnvs.base_radius = 150;
