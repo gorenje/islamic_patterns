@@ -71,12 +71,22 @@ ProPoint.prototype = {
     return (obj.is_point != undefined);
   },
 
+  furthest: function( array_of_points ) {
+    var ret_idx = 0;
+    var max_distance = -Infinity;
+    for ( idx in array_of_points ) {
+      var d = array_of_points[idx].distance( this );
+      if ( d > max_distance ) { ret_idx = idx; max_distance = d; }
+    }
+    return array_of_points[ret_idx];
+  },
+
   closest: function( array_of_points ) {
     var ret_idx = 0;
     var min_distance = Infinity;
     for ( idx in array_of_points ) {
       var d = array_of_points[idx].distance( this );
-      if ( d < min_distance ) { ret_idx = idx;  min_distance = d; }
+      if ( d < min_distance ) { ret_idx = idx; min_distance = d; }
     }
     return array_of_points[ret_idx];
   },

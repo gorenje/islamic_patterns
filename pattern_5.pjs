@@ -5,7 +5,6 @@ var MasterCircle = function( cpt, radius, num_of_points ) {
   this.num_of_points = num_of_points;
   this.circle = new ProCircle( cpt, radius );
   this.factor_larger = 1;
-  this.draw_the_circles = 1;
 };
 
 MasterCircle.prototype = {
